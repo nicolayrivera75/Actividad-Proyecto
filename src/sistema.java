@@ -1,49 +1,97 @@
+import java.util.Scanner;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class sistema {
     public static void main(String[] args) {
-        // Crear pacientes
-        Adulto adulto = new Adulto("30", "Juan Pérez", 123456, "Masculino", "password123");
-        Joven joven = new Joven("20", "María López", 654321, "Femenino", "securepass");
+        Scanner scanner = new Scanner(System.in);
 
-        // Crear médico
-        Medico medico = new Medico("Carlos", "González", 7890);
+        // Pedir datos del paciente
+        System.out.println("Ingrese los datos del paciente:");
+        System.out.print("Nombre: ");
+        String nombrePaciente = scanner.nextLine();
+        
+        System.out.print("Edad: ");
+        String edadPaciente = scanner.nextLine();
+        
+        System.out.print("Identificación: ");
+        int identificacionPaciente = scanner.nextInt();
+        
+        scanner.nextLine(); // Limpiar el buffer de Scanner
+        
+        System.out.print("Género: ");
+        String generoPaciente = scanner.nextLine();
+        
+        System.out.print("Contraseña: ");
+        String contraseñaPaciente = scanner.nextLine();
 
-        // Crear cita médica para el adulto
-        Cita citaAdulto = new Cita(LocalDate.of(2025, 4, 10), 
-                                   LocalTime.of(10, 0), 
-                                   LocalTime.of(10, 30), 
-                                   5, 
-                                   medico);
+        Paciente paciente = new Paciente(edadPaciente, nombrePaciente, identificacionPaciente, generoPaciente, contraseñaPaciente);
+        paciente.setTipoPaciente("General");  // Podrías pedir esto también si lo deseas
 
-        // Crear cita médica para el joven
-        Cita citaJoven = new Cita(LocalDate.of(2025, 4, 12), 
-                                  LocalTime.of(11, 0), 
-                                  LocalTime.of(11, 30), 
-                                  8, 
-                                  medico);
+        // Pedir datos del médico
+        System.out.println("\nIngrese los datos del médico:");
+        System.out.print("Nombre: ");
+        String nombreMedico = scanner.nextLine();
+        
+        System.out.print("Apellido: ");
+        String apellidoMedico = scanner.nextLine();
+        
+        System.out.print("Número de Registro Médico (RM): ");
+        int rmMedico = scanner.nextInt();
+        
+        scanner.nextLine(); // Limpiar el buffer de Scanner
+        
+        Medico medico = new Medico(nombreMedico, apellidoMedico, rmMedico);
 
-        // Asignar las citas a los pacientes
-        citaAdulto.setPaciente(adulto);
-        citaJoven.setPaciente(joven);
+        // Pedir datos de la cita
+        System.out.println("\nIngrese los datos de la cita:");
+        System.out.print("Fecha (AAAA-MM-DD): ");
+        String fechaStr = scanner.nextLine();
+        LocalDate fechaSolicitud = LocalDate.parse(fechaStr);
+        
+        System.out.print("Hora de inicio (HH:MM): ");
+        String horaInicioStr = scanner.nextLine();
+        LocalTime horaInicio = LocalTime.parse(horaInicioStr);
+        
+        System.out.print("Hora de fin (HH:MM): ");
+        String horaFinStr = scanner.nextLine();
+        LocalTime horaFin = LocalTime.parse(horaFinStr);
+        
+        System.out.print("Número de consultorio: ");
+        int numeroConsultorio = scanner.nextInt();
+        
+        scanner.nextLine(); // Limpiar el buffer de Scanner
 
-        // Agregar las citas a la agenda del médico
-        medico.agregarEnMalla(citaAdulto);
-        medico.agregarEnMalla(citaJoven);
+        Cita cita = new Cita(fechaSolicitud, horaInicio, horaFin, numeroConsultorio, medico);
+        cita.setPaciente(paciente);  // Asignar paciente a la cita
+        medico.agregarEnMalla(cita); // Agregar cita a la malla del médico
 
-        // Mostrar información en consola
-        System.out.println("Paciente: " + adulto.getNombre() + " (" + adulto.getTipoPaciente() + ")");
-        System.out.println("Cita: " + citaAdulto.getFechaSolicitud() + " de " + citaAdulto.getHora_inicio() + " a " + citaAdulto.getHora_fin());
-        System.out.println("Médico: " + medico.getNombre() + " " + medico.getApellido());
-        System.out.println("Consultorio: " + citaAdulto.getNumeroConsultorio());
+        // Insertar en la base de datos
+        CRUDpaciente crudPaciente = new CRUDpaciente();
+        crudPaciente.insertarPaciente(paciente);
 
-        System.out.println("\nPaciente: " + joven.getNombre() + " (" + joven.getTipoPaciente() + ")");
-        System.out.println("Cita: " + citaJoven.getFechaSolicitud() + " de " + citaJoven.getHora_inicio() + " a " + citaJoven.getHora_fin());
-        System.out.println("Médico: " + medico.getNombre() + " " + medico.getApellido());
-        System.out.println("Consultorio: " + citaJoven.getNumeroConsultorio());
+        CRUDmedico crudMedico = new CRUDmedico();
+        crudMedico.insertarMedico(medico);
 
-        System.out.println("\nLista de citas del médico:");
-        medico.showMallaDeCitas(); 
+        CRUDcita crudCita = new CRUDcita();
+        crudCita.insertarCita(cita);
+
+        // Consultar un paciente por ID
+        System.out.println("\nConsultando paciente con identificación " + identificacionPaciente + ":");
+        crudPaciente.buscarPacientePorId(identificacionPaciente);
+
+        // Consultar un médico por su RM
+        System.out.println("\nConsultando médico con RM " + rmMedico + ":");
+        crudMedico.buscarMedicoPorRm(rmMedico);
+
+        // Consultar cita por ID
+        System.out.println("\nConsultando cita con ID 1:");
+        crudCita.buscarCitaPorId(1);
+
+        // Mostrar la malla de citas del médico
+        System.out.println("\nMostrando malla de citas del médico:");
+        medico.showMallaDeCitas();
+
+        scanner.close(); // Cerrar el scanner
     }
 }
